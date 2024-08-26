@@ -36,6 +36,8 @@ app.use(parser.json());
 //   }
 // });
 
+// Add New Todo
+
 app.post("/addtodo", async (req, res) => {
   try {
     const { username, email } = req.body;
@@ -56,9 +58,10 @@ app.post("/addtodo", async (req, res) => {
   }
 });
 
+// Get All Todo's and Get By ID
+
 app.get("/all", async (req, res) => {
   const { id } = req.query;
-  console.log(id);
   try {
     const todos = await Todo.find().sort({ createAt: -1 });
     if (todos) {
@@ -73,6 +76,37 @@ app.get("/all", async (req, res) => {
     }
   } catch (error) {
     console.log(error.message);
+  }
+});
+
+app.post("/update/:id", async (req, res) => {
+  const { username, email } = req.body;
+  const id = req.params.id;
+  try {
+    if (!id) return res.status(404).json({ message: "Something missing" });
+
+    const todo = await Todo.findById(id);
+
+    if (username) todo.name = username;
+    if (email) todo.email = email;
+
+    await todo.save();
+
+    res.status(201).json(todo);
+  } catch (error) {
+    console.log(error.message);
+  }
+});
+
+app.get("/delete/:id", async (req, res) => {
+  const id = req.params.id;
+  try {
+    await Todo.findByIdAndDelete(id);
+    return res
+      .status(201)
+      .json({ message: "Deleted Successfully", success: true });
+  } catch (error) {
+    console.log(error);
   }
 });
 
